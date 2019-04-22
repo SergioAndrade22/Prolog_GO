@@ -1,4 +1,4 @@
-:- module(:- module(proylcc, 
+:- module(proylcc, 
 	[  
 		emptyBoard/1,
 		goMove/4
