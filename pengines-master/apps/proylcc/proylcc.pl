@@ -58,6 +58,7 @@ encerrado(Board, Player, [R,C]).
 
 adyacentes(Board, [Player, [Fila, Columna]], [FichaArriba, FichaAbajo, FichaDerecha, FichaIzquierda]):-
 	IndexArriba is Fila - 1, IndexAbajo is Fila + 1, IndexDerecha is Columna + 1, IndexIzquierda is Columna - 1,
+
 	getElem(FilaArriba, IndexArriba, Board),
 	getElem(FichaArriba, Columna, FilaArriba),
 
