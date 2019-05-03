@@ -49,3 +49,32 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
     XIndex > 0,
     XIndexS is XIndex - 1,
     replace(X, XIndexS, Y, Xs, XsY).
+
+/**
+encerrado(Board, Player, [R,C]).
+	adyacetes(Board, Player, [R,C]), ListaAdyaventes),
+*/
+
+
+adyacentes(Board, [Player, [Fila, Columna]], [FichaArriba, FichaAbajo, FichaDerecha, FichaIzquierda]):-
+	IndexArriba is Fila - 1, IndexAbajo is Fila + 1, IndexDerecha is Columna + 1, IndexIzquierda is Columna - 1,
+	getElem(FilaArriba, IndexArriba, Board),
+	getElem(FichaArriba, Columna, FilaArriba),
+
+	getElem(FilaAbajo, IndexAbajo, Board),
+	getElem(FichaAbajo, Columna, FilaAbajo),
+
+	getElem(FilaActual, Fila, Board),
+
+	getElem(FichaDerecha, IndexDerecha, FilaActual),
+
+	getElem(FichaIzquierda, IndexIzquierda, FilaActual)
+
+	.
+
+getElem(X, 0, [X|Xs]).
+
+getElem(X, XIndex, [Xi|Xs]):-
+    XIndex > 0,
+    XIndexS is XIndex - 1,
+    getElem(X, XIndexS, Xs).
