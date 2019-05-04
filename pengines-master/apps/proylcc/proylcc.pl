@@ -36,7 +36,7 @@ emptyBoard([
 goMove(Board, Player, [R,C], RBoard):-
     replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
-	adyacentes(Board, R, C,ListaAdyacentes),
+	adyacentes(Board,Player, R, C,ListaAdyacentes),
 	\+(encerrados(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerrados)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,20 +55,22 @@ opPlayer("w", "b").
 opPlayer("b", "w").
 	
 %Adyacentes tomi
-adyacentes(Board, Fila, Columna, [[FichaArriba, IndexArriba, Columna], [FichaAbajo, IndexAbajo, Columna], [FichaDerecha, Fila, IndexDerecha], [FichaIzquierda, Fila, IndexIzquierda]]):-
+adyacentes(Board, Player, Fila, Columna, [[FichaArriba, IndexArriba, Columna], [FichaAbajo, IndexAbajo, Columna], [FichaDerecha, Fila, IndexDerecha], [FichaIzquierda, Fila, IndexIzquierda]]):-
 	IndexArriba is Fila - 1, IndexAbajo is Fila + 1, IndexDerecha is Columna + 1, IndexIzquierda is Columna - 1,
 	%Obtiene la ficha adyacente arriba
-	getElem(FilaArriba, IndexArriba, Board),
-	getElem(FichaArriba, Columna, FilaArriba),
+	((IndexArriba < 0 , opPlayer(Player, FichaArriba));
+		(getElem(FilaArriba, IndexArriba, Board), getElem(FichaArriba, Columna, FilaArriba))),
 	%Obtiene la ficha adyacente abajo
-	getElem(FilaAbajo, IndexAbajo, Board),
-	getElem(FichaAbajo, Columna, FilaAbajo),
+	((IndexAbajo > 19, opPlayer(Player, FichaAbajo));
+		(getElem(FilaAbajo, IndexAbajo, Board), getElem(FichaAbajo, Columna, FilaAbajo))),
 	%%Obtiene la fila actual
 	getElem(FilaActual, Fila, Board),
 	%Obtiene la ficha adyacente derecha
-	getElem(FichaDerecha, IndexDerecha, FilaActual),
+	((IndexDerecha > 19, opPlayer(Player, FichaDerecha));
+		getElem(FichaDerecha, IndexDerecha, FilaActual)),
 	%Obtiene la ficha adyacente izquierda
-	getElem(FichaIzquierda, IndexIzquierda, FilaActual).
+	((IndexIzquierda < 0, opPlayer(Player, FichaIzquierda));
+		getElem(FichaIzquierda, IndexIzquierda, FilaActual)).
 
 getElem(X, 0, [X|Xs]).
 
@@ -84,7 +86,7 @@ encerrados(Board,Player,R,C,[],Vistos,[[Player,R,C]]).
 %Caso recursivo, donde el siguiente adyacente es del mismo color, chequeo si esta encerrado y sus adyacentes, y reviso el resto de mis adyacentes
 encerrados(Board,Player,R,C,[[Player, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
 	\+(member([Player, RAd, CAd],Vistos)),
-	adyacentes(Board,R,C,RAdyacentes),
+	adyacentes(Board,Player,R,C,RAdyacentes),
 	encerrados(Board,Player,RAd,CAd,RAdyacentes,[[Player,R,C]|Vistos],EncerradosAd),
 	encerrados(Board,Player,R,C,Adyacentes,[[Player,R,C]|Vistos],EncerradosP),
 	append(EncerradosP,EncerradosAd,Encerrados).
