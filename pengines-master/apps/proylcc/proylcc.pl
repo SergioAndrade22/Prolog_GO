@@ -51,33 +51,17 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
     XIndexS is XIndex - 1,
     replace(X, XIndexS, Y, Xs, XsY).
 
-%Caso base, funca 
+opPlayer("w", "b").
+opPlayer("b", "w").
+
+%TODOS los casos en uno... soy un HDP++
 encerrado(Board, Player, R, C, Encerradas, [[Player, R, C]|Encerradas]):-
 	adyacentes(Board, R, C, [FichaArriba, IndexArriba, Columna], [FichaAbajo, IndexAbajo, Columna], [FichaDerecha, Fila, IndexDerecha], [FichaIzquierda, Fila, IndexIzquierda]),
-	((FichaArriba \= Player, FichaArriba \= "-") ; member([FichaArriba, IndexArriba, Columna], Encerradas)),
-	((FichaAbajo \= Player, FichaAbajo \= "-") ; member([FichaAbajo, IndexAbajo, Columna], Encerradas)),
-	((FichaDerecha \= Player, FichaDerecha \= "-") ; member([FichaDerecha, Fila, IndexDerecha], Encerradas)),
-	((FichaIzquierda \= Player, FichaIzquierda \= "-") ; member([FichaIzquierda, Fila, IndexIzquierda], Encerradas)).
-
-
-%%Encerrados Tomi
-%Caso Base, cuando no quedan mas adyacentes por revisar, asumo que estoy encerrado
-encerrados(Board,Player,R,C,[],Vistos,[[Player,R,C]]).
-
-%Caso recursivo, donde el siguiente adyacente es del mismo color, chequeo si esta encerrado y sus adyacentes, y reviso el resto de mis adyacentes
-encerrados(Board,Player,R,C,[[Player, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
-	\+(member([Player, RAd, CAd],Vistos)),
-	adyacentes(Board,R,C,RAdyacentes),
-	encerrados(Board,Player,RAd,CAd,RAdyacentes,[[Player,R,C]|Vistos],EncerradosAd,),%No se que tan legal es hacer meter [[Player,R,C]|Vistos]
-	encerrados(Board,Player,R,C,Adyacentes,[[Player,R,C]|Vistos],EncerradosP),
-	append(EncerradosP,EncerradosAd,Encerrados).
-	
-%Caso recursivo, donde el siguiente adyacente es del color opuesto, chequeo los demas adyacentes
-encerrados(Board,Player,R,C,[[Player2, RAd, CAd]|Adyacentes],Vistos,Encerrados):-
-	Player2 \= Player,
-	Player2 \= "-",
-	encerrados(Board,Player,R,C,Adyacentes,Vistos,Encerrados).
-	
+	opPlayer(Player, OpPlayer),
+	(FichaArriba \= "-" , (FichaArriba = OpPlayer ; member([FichaArriba, IndexArriba, Columna], Encerradas); encerrado(Board, FichaArriba, IndexArriba, Columna, [[Player, R, C]|Encerradas], EncerradasArriba))),
+	(FichaAbajo \= "-", (FichaAbajo = OpPlayer ; member([FichaAbajo, IndexAbajo, Columna], Encerradas); encerrado(Board, FichaAbajo, IndexAbajo, Columna, [[Player, R, C]|Encerradas], EncerradasAbajo))),
+	(FichaDerecha \= "-", (FichaDerecha = OpPlayer ; member([FichaDerecha, Fila, IndexDerecha], Encerradas); encerrado(Board, FichaDerecha, Fila, IndexDerecha, [[Player, R, C]|Encerradas], EncerradasDerecha))),
+	(FichaIzquierda \= "-", (FichaIzquierda = OpPlayer ; member([FichaIzquierda, Fila, IndexIzquierda], Encerradas); encerrado(Board, FichaIzquierda, Fila, Columna, [[Player, R, C]|Encerradas], EncerradasIzquierda))).
 
 adyacentes(Board, Fila, Columna, [FichaArriba, IndexArriba, Columna], [FichaAbajo, IndexAbajo, Columna], [FichaDerecha, Fila, IndexDerecha], [FichaIzquierda, Fila, IndexIzquierda]):-
 	IndexArriba is Fila - 1, IndexAbajo is Fila + 1, IndexDerecha is Columna + 1, IndexIzquierda is Columna - 1,
@@ -100,3 +84,21 @@ getElem(X, XIndex, [Xi|Xs]):-
     XIndex > 0,
     XIndexS is XIndex - 1,
     getElem(X, XIndexS, Xs).
+
+%%Encerrados Tomi
+%Caso Base, cuando no quedan mas adyacentes por revisar, asumo que estoy encerrado
+encerrados(Board,Player,R,C,[],Vistos,[[Player,R,C]]).
+
+%Caso recursivo, donde el siguiente adyacente es del mismo color, chequeo si esta encerrado y sus adyacentes, y reviso el resto de mis adyacentes
+encerrados(Board,Player,R,C,[[Player, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
+	\+(member([Player, RAd, CAd],Vistos)),
+	adyacentes(Board,R,C,RAdyacentes),
+	encerrados(Board,Player,RAd,CAd,RAdyacentes,[[Player,R,C]|Vistos],EncerradosAd),%No se que tan legal es hacer meter [[Player,R,C]|Vistos]
+	encerrados(Board,Player,R,C,Adyacentes,[[Player,R,C]|Vistos],EncerradosP),
+	append(EncerradosP,EncerradosAd,Encerrados).
+	
+%Caso recursivo, donde el siguiente adyacente es del color opuesto, chequeo los demas adyacentes
+encerrados(Board,Player,R,C,[[Player2, RAd, CAd]|Adyacentes],Vistos,Encerrados):-
+	Player2 \= Player,
+	Player2 \= "-",
+	encerrados(Board,Player,R,C,Adyacentes,Vistos,Encerrados).
