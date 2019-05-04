@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="go.css">
         <link rel="icon" href="images/favicon-32x32.png" type="image/png" sizes="32x32">
     </head>
-    <body class="turnBlack">
+    <body class="turnBlack" onkeydown="keyEvent(event)">
         <div class="mainPanel">
             <div class="leftBar">
                 <div class="turnPanel">
@@ -18,7 +18,7 @@
                     Pass
                 </button>
             </div>
-            <div class="board">
+            <div class="board" >
                 <div id="boardCells"></div>
                 <div id="gridCells"></div>
             </div>

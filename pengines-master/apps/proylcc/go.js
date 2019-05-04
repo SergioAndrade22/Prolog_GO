@@ -111,4 +111,9 @@ function switchTurn() {
 * accessing and manipulating it.
 */
 
+function keyEvent(event){
+	var key = event.key;
+	if(key === "p" || key === "p") switchTurn();
+}	
+
 window.onload = init;

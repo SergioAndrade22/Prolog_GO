@@ -36,8 +36,9 @@ emptyBoard([
 goMove(Board, Player, [R,C], RBoard):-
     replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
-    \+(encerrado(RBoard, Player, R, C, [], X)).
-
+	adyacentes(Board, R, C,ListaAdyacentes),
+	\+(encerrados(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerrados)).
+    %\+(encerrado(RBoard, Player, R, C, [], X)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -53,17 +54,9 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
 
 opPlayer("w", "b").
 opPlayer("b", "w").
-
-%TODOS los casos en uno... soy un HDP++
-encerrado(Board, Player, R, C, Encerradas, [[Player, R, C]|Encerradas]):-
-	adyacentes(Board, R, C, [FichaArriba, IndexArriba, Columna], [FichaAbajo, IndexAbajo, Columna], [FichaDerecha, Fila, IndexDerecha], [FichaIzquierda, Fila, IndexIzquierda]),
-	opPlayer(Player, OpPlayer),
-	(FichaArriba \= "-" , (FichaArriba = OpPlayer ; member([FichaArriba, IndexArriba, Columna], Encerradas); encerrado(Board, FichaArriba, IndexArriba, Columna, [[Player, R, C]|Encerradas], EncerradasArriba))),
-	(FichaAbajo \= "-", (FichaAbajo = OpPlayer ; member([FichaAbajo, IndexAbajo, Columna], Encerradas); encerrado(Board, FichaAbajo, IndexAbajo, Columna, [[Player, R, C]|Encerradas], EncerradasAbajo))),
-	(FichaDerecha \= "-", (FichaDerecha = OpPlayer ; member([FichaDerecha, Fila, IndexDerecha], Encerradas); encerrado(Board, FichaDerecha, Fila, IndexDerecha, [[Player, R, C]|Encerradas], EncerradasDerecha))),
-	(FichaIzquierda \= "-", (FichaIzquierda = OpPlayer ; member([FichaIzquierda, Fila, IndexIzquierda], Encerradas); encerrado(Board, FichaIzquierda, Fila, Columna, [[Player, R, C]|Encerradas], EncerradasIzquierda))).
-
-adyacentes(Board, Fila, Columna, [FichaArriba, IndexArriba, Columna], [FichaAbajo, IndexAbajo, Columna], [FichaDerecha, Fila, IndexDerecha], [FichaIzquierda, Fila, IndexIzquierda]):-
+	
+%Adyacentes tomi
+adyacentes(Board, Fila, Columna, [[FichaArriba, IndexArriba, Columna], [FichaAbajo, IndexAbajo, Columna], [FichaDerecha, Fila, IndexDerecha], [FichaIzquierda, Fila, IndexIzquierda]]):-
 	IndexArriba is Fila - 1, IndexAbajo is Fila + 1, IndexDerecha is Columna + 1, IndexIzquierda is Columna - 1,
 	%Obtiene la ficha adyacente arriba
 	getElem(FilaArriba, IndexArriba, Board),
@@ -93,9 +86,13 @@ encerrados(Board,Player,R,C,[],Vistos,[[Player,R,C]]).
 encerrados(Board,Player,R,C,[[Player, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
 	\+(member([Player, RAd, CAd],Vistos)),
 	adyacentes(Board,R,C,RAdyacentes),
-	encerrados(Board,Player,RAd,CAd,RAdyacentes,[[Player,R,C]|Vistos],EncerradosAd),%No se que tan legal es hacer meter [[Player,R,C]|Vistos]
+	encerrados(Board,Player,RAd,CAd,RAdyacentes,[[Player,R,C]|Vistos],EncerradosAd),
 	encerrados(Board,Player,R,C,Adyacentes,[[Player,R,C]|Vistos],EncerradosP),
 	append(EncerradosP,EncerradosAd,Encerrados).
+%Caso recursivo, donde el siguiente adyacente es del mismo color, pero todavía ya lo revisé, sigo con los demas adyacentes
+encerrados(Board,Player,R,C,[[Player, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
+	member([Player, RAd, CAd],Vistos),
+	encerrados(Board,Player,R,C,Adyacentes,[[Player,R,C]|Vistos],Encerrados).
 	
 %Caso recursivo, donde el siguiente adyacente es del color opuesto, chequeo los demas adyacentes
 encerrados(Board,Player,R,C,[[Player2, RAd, CAd]|Adyacentes],Vistos,Encerrados):-
