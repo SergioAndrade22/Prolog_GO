@@ -38,7 +38,6 @@ goMove(Board, Player, [R,C], RBoard):-
     replace("-", C, Player, Row, NRow),
 	adyacentes(Board, R, C,ListaAdyacentes),
 	\+(encerrados(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerrados)).
-    %\+(encerrado(RBoard, Player, R, C, [], X)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
