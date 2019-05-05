@@ -33,16 +33,34 @@ emptyBoard([
 % RBoard es la configuración resultante de reflejar la movida del jugador Player
 % en la posición Pos a partir de la configuración Board.
 
-goMove(Board, Player, [R,C], RBoard):-
+goMove(Board, Player, [R,C], RRBoard):-
     replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
-	adyacentes(Board,Player, R, C,ListaAdyacentes),
+	adyacentes(RBoard, Player, R, C, ListaAdyacentes),
+	adyacentesEncerrados(Board, ListaAdyacentes, EncerradosAEliminar),
+	eliminarEncerrados(RBoard, EncerradosAEliminar, RRBoard),
+    %Verifica el suicidio
 	\+(encerrados(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerrados)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % replace(?X, +XIndex, +Y, +Xs, -XsY)
 %
+
+eliminarEncerrados(Board, [], NBoard).
+
+eliminarEncerrados(Board, [[Ficha, Fila, Columna]|AEliminar], NBoard):-
+    replace(Row, Fila, NRow, Board, RBoard),
+    replace("-", Columna, Ficha, Row, NRow),
+    eliminarEncerrados(RBoard, AEliminar, NBoard).
+	
+
+adyacentesEncerrados(Board, [], NuevosEncerrados).
+
+adyacentesEncerrados(Board, [[Ficha, Fila, Columna]|Adyacentes], NuevosEncerrados):-
+	adyacentes(Board, Ficha, Fila, Columna, SiguientesAdyacentes),
+	encerrados(Board, Ficha, Fila, Columna, SiguientesAdyacentes, [Ficha, Fila, Columna], NuevosEncerrados),
+	adyacentesEncerrados(Board, Adyacentes, NuevosEncerrados).
 
 replace(X, 0, Y, [X|Xs], [Y|Xs]).
 
@@ -79,7 +97,6 @@ getElem(X, XIndex, [Xi|Xs]):-
     XIndexS is XIndex - 1,
     getElem(X, XIndexS, Xs).
 
-%%Encerrados Tomi
 %Caso Base, cuando no quedan mas adyacentes por revisar, asumo que estoy encerrado
 encerrados(Board,Player,R,C,[],Vistos,[[Player,R,C]]).
 
@@ -90,6 +107,7 @@ encerrados(Board,Player,R,C,[[Player, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]
 	encerrados(Board,Player,RAd,CAd,RAdyacentes,[[Player,R,C]|Vistos],EncerradosAd),
 	encerrados(Board,Player,R,C,Adyacentes,[[Player,R,C]|Vistos],EncerradosP),
 	append(EncerradosP,EncerradosAd,Encerrados).
+
 %Caso recursivo, donde el siguiente adyacente es del mismo color, pero todavía ya lo revisé, sigo con los demas adyacentes
 encerrados(Board,Player,R,C,[[Player, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
 	member([Player, RAd, CAd],Vistos),
