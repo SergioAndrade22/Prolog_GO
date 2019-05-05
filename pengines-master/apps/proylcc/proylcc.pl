@@ -61,12 +61,12 @@ adyacentes(Board, Player, Fila, Columna, [[FichaArriba, IndexArriba, Columna], [
 	((IndexArriba < 0 , opPlayer(Player, FichaArriba));
 		(getElem(FilaArriba, IndexArriba, Board), getElem(FichaArriba, Columna, FilaArriba))),
 	%Obtiene la ficha adyacente abajo
-	((IndexAbajo > 19, opPlayer(Player, FichaAbajo));
+	((IndexAbajo > 18, opPlayer(Player, FichaAbajo));
 		(getElem(FilaAbajo, IndexAbajo, Board), getElem(FichaAbajo, Columna, FilaAbajo))),
 	%%Obtiene la fila actual
 	getElem(FilaActual, Fila, Board),
 	%Obtiene la ficha adyacente derecha
-	((IndexDerecha > 19, opPlayer(Player, FichaDerecha));
+	((IndexDerecha > 18, opPlayer(Player, FichaDerecha));
 		getElem(FichaDerecha, IndexDerecha, FilaActual)),
 	%Obtiene la ficha adyacente izquierda
 	((IndexIzquierda < 0, opPlayer(Player, FichaIzquierda));
