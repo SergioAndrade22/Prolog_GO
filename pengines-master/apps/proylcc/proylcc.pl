@@ -29,38 +29,22 @@ emptyBoard([
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % goMove(+Board, +Player, +Pos, -RBoard)
-%
+% 
 % RBoard es la configuración resultante de reflejar la movida del jugador Player
 % en la posición Pos a partir de la configuración Board.
 
-goMove(Board, Player, [R,C], RRBoard):-
+goMove(Board, Player, [R,C], RBoard):-
     replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
-	adyacentes(RBoard, Player, R, C, ListaAdyacentes),
-	adyacentesEncerrados(Board, ListaAdyacentes, EncerradosAEliminar),
-	eliminarEncerrados(RBoard, EncerradosAEliminar, RRBoard),
-    %Verifica el suicidio
+	adyacentes(Board,Player, R, C,ListaAdyacentes),
 	\+(encerrados(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerrados)).
-
+	%encerradosContrario(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerradosContrarios).
+	%eliminarEncerrados(RBoard,ListaEncerradosContrarios,NBoard).
+	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % replace(?X, +XIndex, +Y, +Xs, -XsY)
 %
-
-eliminarEncerrados(Board, [], NBoard).
-
-eliminarEncerrados(Board, [[Ficha, Fila, Columna]|AEliminar], NBoard):-
-    replace(Row, Fila, NRow, Board, RBoard),
-    replace("-", Columna, Ficha, Row, NRow),
-    eliminarEncerrados(RBoard, AEliminar, NBoard).
-	
-
-adyacentesEncerrados(Board, [], NuevosEncerrados).
-
-adyacentesEncerrados(Board, [[Ficha, Fila, Columna]|Adyacentes], NuevosEncerrados):-
-	adyacentes(Board, Ficha, Fila, Columna, SiguientesAdyacentes),
-	encerrados(Board, Ficha, Fila, Columna, SiguientesAdyacentes, [Ficha, Fila, Columna], NuevosEncerrados),
-	adyacentesEncerrados(Board, Adyacentes, NuevosEncerrados).
 
 replace(X, 0, Y, [X|Xs], [Y|Xs]).
 
@@ -97,6 +81,7 @@ getElem(X, XIndex, [Xi|Xs]):-
     XIndexS is XIndex - 1,
     getElem(X, XIndexS, Xs).
 
+%%Encerrados Tomi
 %Caso Base, cuando no quedan mas adyacentes por revisar, asumo que estoy encerrado
 encerrados(Board,Player,R,C,[],Vistos,[[Player,R,C]]).
 
@@ -105,16 +90,46 @@ encerrados(Board,Player,R,C,[[Player, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]
 	\+(member([Player, RAd, CAd],Vistos)),
 	adyacentes(Board,Player,R,C,RAdyacentes),
 	encerrados(Board,Player,RAd,CAd,RAdyacentes,[[Player,R,C]|Vistos],EncerradosAd),
-	encerrados(Board,Player,R,C,Adyacentes,[[Player,R,C]|Vistos],EncerradosP),
+	append(Vistos,EncerradosAd,VistosAux),
+	encerrados(Board,Player,R,C,Adyacentes,[[Player,R,C]|VistosAux],EncerradosP),
 	append(EncerradosP,EncerradosAd,Encerrados).
-
 %Caso recursivo, donde el siguiente adyacente es del mismo color, pero todavía ya lo revisé, sigo con los demas adyacentes
 encerrados(Board,Player,R,C,[[Player, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
 	member([Player, RAd, CAd],Vistos),
-	encerrados(Board,Player,R,C,Adyacentes,[[Player,R,C]|Vistos],Encerrados).
+	encerrados(Board,Player,R,C,Adyacentes,Vistos,Encerrados).
 	
 %Caso recursivo, donde el siguiente adyacente es del color opuesto, chequeo los demas adyacentes
 encerrados(Board,Player,R,C,[[Player2, RAd, CAd]|Adyacentes],Vistos,Encerrados):-
 	Player2 \= Player,
 	Player2 \= "-",
 	encerrados(Board,Player,R,C,Adyacentes,Vistos,Encerrados).
+
+eliminarEncerrados(Board, [], Board).
+
+eliminarEncerrados(Board, [[Ficha, Fila, Columna]|AEliminar], NBoard):-
+    replace(Row, Fila, NRow, Board, RBoard),
+    replace(Ficha, Columna, "-", Row, NRow),
+    eliminarEncerrados(RBoard, AEliminar, NBoard).
+
+%%EncerradosContrarios Hecho por tomi, no funciona termina de funcionar
+
+encerradosContrario(Board,Player,R,C,[],Vistos,[[Player,R,C]]).
+
+encerradosContrario(Board,Player,R,C,[[Ficha, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
+	opPlayer(Player,Player2),
+	Ficha \= Player2,
+	encerradosContrario(Board,Player,R,C,Adyacentes,Vistos,Encerrados).
+	
+encerradosContrario(Board,Player,R,C,[[Ficha, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
+	Ficha \= Player,
+	Player2 \= "-",
+	member([Player, RAd, CAd],Vistos),
+	encerradosContrario(Board,Player,R,C,Adyacentes,Vistos, Encerrados).
+
+encerradosContrario(Board,Player,R,C,[[Ficha, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
+	Ficha \= Player,
+	Player2 \= "-",
+	adyacentes(Board,Ficha, RAd, CAd,AdyacentesAd),
+	encerrados(Board,Ficha, RAd,CAd,AdyacentesAd,[[Ficha, RAd, CAd]|Vistos],EncerradosAd),
+	append(EncerradosAd,Vistos,NuevosVistos),
+	encerradosContrario(Board,Player,R,C,[[Ficha, RAd, CAd]|NuevosVistos],Adyacentes, Encerrados).
