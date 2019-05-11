@@ -115,6 +115,7 @@ encerrados(Board, Player, R, C, [[Player2, _RAd, _CAd]|Adyacentes], Vistos, Ence
 	encerrados(Board, Player, R, C, Adyacentes, Vistos, Encerrados).
 
 %%EncerradosContrarios Hecho por tomi, no termina de funcionar
+
 %Caso base, no me quedan adyacentes por revisar
 encerradosContrario(_Board, _Player, _R, _C, [], _Vistos, []).
 
@@ -122,8 +123,12 @@ encerradosContrario(_Board, _Player, _R, _C, [], _Vistos, []).
 encerradosContrario(Board, Player, R, C, [[Player, _RAd, _CAd]|Adyacentes], Vistos, Encerrados):-
 	encerradosContrario(Board,Player,R,C,Adyacentes,Vistos,Encerrados).
 
+%Caso recursivo 1 bis, adyacente no es del color opuesto, lo salteo
+encerradosContrario(Board, Player, R, C, [["-", _RAd, _CAd]|Adyacentes], Vistos, Encerrados):-
+	encerradosContrario(Board,Player,R,C,Adyacentes,Vistos,Encerrados).
+
 %Caso recursivo 2, adyacente es del color opuesto y ya lo visité, lo salteo
-encerradosContrario(Board,Player,R,C,[[Ficha, RAd, CAd]|Adyacentes],Vistos,Encerrados):-
+encerradosContrario(Board, Player,R,C,[[Ficha, RAd, CAd]|Adyacentes],Vistos,Encerrados):-
 	Ficha \= Player,
 	Ficha \= "-",
 	member([Player, RAd, CAd],Vistos),
