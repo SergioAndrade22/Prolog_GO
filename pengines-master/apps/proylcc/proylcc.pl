@@ -37,7 +37,7 @@ goMove(Board, Player, [R,C], RBoard):-
     replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
 	adyacentes(RBoard,Player, R, C,ListaAdyacentes),
-	\+(encerrados(RBoard, Player, R, C, ListaAdyacentes, [[Player,R,C]], ListaEncerrados)).
+	\+(encerrados(RBoard, Player, R, C, ListaAdyacentes, [[Player,R,C]], _ListaEncerrados)).
 	%encerradosContrario(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerradosContrarios).
 	%eliminarEncerrados(RBoard,ListaEncerradosContrarios,NBoard).
 	
@@ -74,16 +74,16 @@ adyacentes(Board, Player, Fila, Columna, [[FichaArriba, IndexArriba, Columna], [
 	((IndexIzquierda < 0, opPlayer(Player, FichaIzquierda));
 		getElem(FichaIzquierda, IndexIzquierda, FilaActual)).
 
-getElem(X, 0, [X|Xs]).
+getElem(X, 0, [X|_Xs]).
 
-getElem(X, XIndex, [Xi|Xs]):-
+getElem(X, XIndex, [_Xi|Xs]):-
     XIndex > 0,
     XIndexS is XIndex - 1,
     getElem(X, XIndexS, Xs).
 
 %%Encerrados Tomi
 %Caso Base, cuando no quedan mas adyacentes por revisar, asumo que estoy encerrado
-encerrados(Board, Player, R, C, [], Vistos, [[Player,R,C]]).
+encerrados(_Board, Player, R, C, [], _Vistos, [[Player,R,C]]).
 
 %Caso recursivo, donde el siguiente adyacente es del mismo color, chequeo si esta encerrado y sus adyacentes, y reviso el resto de mis adyacentes
 encerrados(Board, Player, R, C, [[Player, RAd, CAd]|Adyacentes], Vistos, [[Player,R,C]|Encerrados]):-
@@ -100,19 +100,17 @@ encerrados(Board, Player, R, C, [[Player, RAd, CAd]|Adyacentes], Vistos, [[Playe
 	encerrados(Board, Player, R, C, Adyacentes, Vistos, Encerrados).
 	
 %Caso recursivo, donde el siguiente adyacente es del color opuesto, chequeo los demas adyacentes
-encerrados(Board, Player, R, C, [[Player2, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
+encerrados(Board, Player, R, C, [[Player2, _RAd, _CAd]|Adyacentes], Vistos, Encerrados):-
 	Player2 \= Player,
 	Player2 \= "-",
 	encerrados(Board, Player, R, C, Adyacentes, Vistos, Encerrados).
 
 %%EncerradosContrarios Hecho por tomi, no termina de funcionar
 %Caso base, no me quedan adyacentes por revisar
-encerradosContrario(Board,Player,R,C,[],Vistos,[]).
+encerradosContrario(_Board, _Player, _R, _C, [], _Vistos, []).
 
 %Caso recursivo 1, adyacente no es del color opuesto, lo salteo
-encerradosContrario(Board,Player,R,C,[[Player, RAd, CAd]|Adyacentes],Vistos,[[Player,R,C]|Encerrados]):-
-	opPlayer(Player,Player2),
-	Ficha \= Player2,
+encerradosContrario(Board, Player, R, C, [[Player, _RAd, _CAd]|Adyacentes], Vistos, [[Player,R,C]|Encerrados]):-
 	encerradosContrario(Board,Player,R,C,Adyacentes,Vistos,Encerrados).
 
 %Caso recursivo 2, adyacente es del color opuesto y ya lo visité, lo salteo
