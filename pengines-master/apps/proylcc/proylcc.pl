@@ -38,7 +38,9 @@ goMove(Board, Player, [R,C], NBoard):-
     replace("-", C, Player, Row, NRow),
 	adyacentes(RBoard,Player, R, C,ListaAdyacentes),
 	encerradosContrario(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerradosContrarios),
-	eliminarEncerrados(RBoard, ListaEncerradosContrarios, NBoard).
+	eliminarEncerrados(RBoard, ListaEncerradosContrarios, NBoard),
+	adyacentes(NBoard, Player, R, C, NListaAdyacentes),
+	\+(encerrados(NBoard, Player, R, C, NListaAdyacentes, [[Player,R,C]], _ListaEncerrados)).
 
 goMove(Board, Player, [R,C], RBoard):-
     replace(Row, R, NRow, Board, RBoard),
