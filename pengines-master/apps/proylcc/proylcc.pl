@@ -48,13 +48,6 @@ goMove(Board, Player, [R,C], RBoard):-
 	adyacentes(RBoard,Player, R, C,ListaAdyacentes),
 	\+(encerrados(RBoard, Player, R, C, ListaAdyacentes, [[Player,R,C]], ListaEncerrados)).
 
-%goMove(Board, Player, [R,C], NBoard,ListaEncerrados):-
-%    replace(Row, R, NRow, Board, RBoard),
-%    replace("-", C, Player, Row, NRow),
-%	adyacentes(RBoard,Player, R, C,ListaAdyacentes),
-%	encerrados(RBoard, Player, R, C, ListaAdyacentes, [[Player,R,C]], ListaEncerrados).
-%	eliminarEncerrados(RBoard, ListaEncerrados, NBoard).
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % replace(?X, +XIndex, +Y, +Xs, -XsY)
@@ -161,4 +154,3 @@ encerradosContrario(Board, Player, R, C, [[Ficha, RAd, CAd]|Adyacentes], Vistos,
 	Ficha \= Player,
 	Ficha \= "-",
 	encerradosContrario(Board, Player, R, C, Adyacentes, [[Ficha, RAd, CAd]|Vistos], Encerrados).
-

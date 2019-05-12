@@ -9,6 +9,8 @@ var cellElems;
 var turnBlack = false;
 var bodyElem;
 var latestStone;
+var countB = 0;
+var countW = 0;
 
 
 
@@ -80,6 +82,10 @@ function handleSuccess(response) {
                 (gridData[row][col] === "w" ? " stoneWhite" : gridData[row][col] === "b" ? " stoneBlack" : "") +
                 (latestStone && row === latestStone[0] && col === latestStone[1] ? " latest" : "");
         }
+	if(turnBlack) 
+		countB = 0;
+	else 
+		countW = 0;
     switchTurn();
 }
 
@@ -96,9 +102,9 @@ function handleFailure() {
  */
 
 function handleClick(row, col) {
-    const s = "goMove(" + Pengine.stringify(gridData) + "," + Pengine.stringify(turnBlack ? "b" : "w") + "," + "[" + row + "," + col + "]" + ",Board)";
-    pengine.ask(s);
-    latestStone = [row, col];
+	const s = "goMove(" + Pengine.stringify(gridData) + "," + Pengine.stringify(turnBlack ? "b" : "w") + "," + "[" + row + "," + col + "]" + ",Board)";
+	pengine.ask(s);
+	latestStone = [row, col];
 }
 
 function switchTurn() {
@@ -113,7 +119,30 @@ function switchTurn() {
 
 function keyEvent(event){
 	var key = event.key;
-	if(key === "p" || key === "p") switchTurn();
+	if(key === "p" || key === "p") passTurn();
 }	
+
+function passTurn(){
+	
+	if(turnBlack)
+		countB++;
+	else
+		countW++;
+	
+	if(countB === 2 || countW === 2)
+		finish();
+	else
+		switchTurn();
+	
+}
+
+function finish(){
+	var s = turnBlack ? "White" : "Black";
+	alert("Finish! " + s +" wins");
+	//Aca vamos a armar el predicado para mandarle al prolog
+	const c = "";
+	//pengine.ask(c);
+
+}
 
 window.onload = init;
