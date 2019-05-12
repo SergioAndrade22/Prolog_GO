@@ -34,7 +34,7 @@ emptyBoard([
 % en la posición Pos a partir de la configuración Board.
 
 goMove(Board, Player, [R,C], NBoard):-
-    replace(Row, R, NRow, Board, RBoard),
+	replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
 	adyacentes(RBoard,Player, R, C,ListaAdyacentes),
 	encerradosContrario(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerradosContrarios),
@@ -46,10 +46,15 @@ goMove(Board, Player, [R,C], RBoard):-
     replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
 	adyacentes(RBoard,Player, R, C,ListaAdyacentes),
-	\+(encerrados(RBoard, Player, R, C, ListaAdyacentes, [[Player,R,C]], _ListaEncerrados)).
-	%encerradosContrario(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerradosContrarios).
-	%eliminarEncerrados(RBoard,ListaEncerradosContrarios,NBoard).
-	
+	\+(encerrados(RBoard, Player, R, C, ListaAdyacentes, [[Player,R,C]], ListaEncerrados)).
+
+%goMove(Board, Player, [R,C], NBoard,ListaEncerrados):-
+%    replace(Row, R, NRow, Board, RBoard),
+%    replace("-", C, Player, Row, NRow),
+%	adyacentes(RBoard,Player, R, C,ListaAdyacentes),
+%	encerrados(RBoard, Player, R, C, ListaAdyacentes, [[Player,R,C]], ListaEncerrados).
+%	eliminarEncerrados(RBoard, ListaEncerrados, NBoard).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % replace(?X, +XIndex, +Y, +Xs, -XsY)
@@ -64,7 +69,14 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
 
 opPlayer("w", "b").
 opPlayer("b", "w").
-	
+
+eliminarEncerrados(Board, [], Board).
+
+eliminarEncerrados(Board, [[Ficha, Fila, Columna]|AEliminar], NBoard):-
+    replace(Row, Fila, NRow, Board, RBoard),
+    replace(Ficha, Columna, "-", Row, NRow),
+    eliminarEncerrados(RBoard, AEliminar, NBoard).
+
 %Adyacentes tomi
 adyacentes(Board, Player, Fila, Columna, [[FichaArriba, IndexArriba, Columna], [FichaAbajo, IndexAbajo, Columna], [FichaDerecha, Fila, IndexDerecha], [FichaIzquierda, Fila, IndexIzquierda]]):-
 	IndexArriba is Fila - 1, IndexAbajo is Fila + 1, IndexDerecha is Columna + 1, IndexIzquierda is Columna - 1,
@@ -95,16 +107,16 @@ getElem(X, XIndex, [_Xi|Xs]):-
 encerrados(_Board, Player, R, C, [], _Vistos, [[Player,R,C]]).
 
 %Caso recursivo, donde el siguiente adyacente es del mismo color, chequeo si esta encerrado y sus adyacentes, y reviso el resto de mis adyacentes
-encerrados(Board, Player, R, C, [[Player, RAd, CAd]|Adyacentes], Vistos, [[Player,R,C]|Encerrados]):-
+encerrados(Board, Player, R, C, [[Player, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
 	\+(member([Player, RAd, CAd], Vistos)),
 	adyacentes(Board, Player, RAd, CAd, RAdyacentes),
-	encerrados(Board, Player, RAd, CAd, RAdyacentes, [[Player,R,C]|Vistos], EncerradosAd),
-	append(Vistos, EncerradosAd, VistosAux),
-	encerrados(Board, Player, R, C, Adyacentes, [[Player,R,C]|VistosAux],EncerradosP),
+	encerrados(Board, Player, RAd, CAd, RAdyacentes, [[Player,RAd,CAd]|Vistos], EncerradosAd),
+	append([[Player,RAd,CAd]|Vistos], EncerradosAd, VistosAux),
+	encerrados(Board, Player, R, C, Adyacentes, VistosAux,EncerradosP),
 	append(EncerradosP,EncerradosAd,Encerrados).
 
 %Caso recursivo, donde el siguiente adyacente es del mismo color, pero ya lo revisé, sigo con los demas adyacentes
-encerrados(Board, Player, R, C, [[Player, RAd, CAd]|Adyacentes], Vistos, [[Player,R,C]|Encerrados]):-
+encerrados(Board, Player, R, C, [[Player, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
 	member([Player, RAd, CAd],Vistos),
 	encerrados(Board, Player, R, C, Adyacentes, Vistos, Encerrados).
 	
@@ -121,26 +133,26 @@ encerradosContrario(_Board, _Player, _R, _C, [], _Vistos, []).
 
 %Caso recursivo 1, adyacente no es del color opuesto, lo salteo
 encerradosContrario(Board, Player, R, C, [[Player, _RAd, _CAd]|Adyacentes], Vistos, Encerrados):-
-	encerradosContrario(Board,Player,R,C,Adyacentes,Vistos,Encerrados).
+	encerradosContrario(Board, Player, R, C, Adyacentes, Vistos, Encerrados).
 
 %Caso recursivo 1 bis, adyacente no es del color opuesto, lo salteo
 encerradosContrario(Board, Player, R, C, [["-", _RAd, _CAd]|Adyacentes], Vistos, Encerrados):-
-	encerradosContrario(Board,Player,R,C,Adyacentes,Vistos,Encerrados).
+	encerradosContrario(Board, Player, R, C, Adyacentes, Vistos, Encerrados).
 
 %Caso recursivo 2, adyacente es del color opuesto y ya lo visité, lo salteo
-encerradosContrario(Board, Player,R,C,[[Ficha, RAd, CAd]|Adyacentes],Vistos,Encerrados):-
+encerradosContrario(Board, Player,R,C,[[Ficha, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
 	Ficha \= Player,
 	Ficha \= "-",
 	member([Player, RAd, CAd],Vistos),
-	encerradosContrario(Board,Player,R,C,Adyacentes,Vistos, Encerrados).
+	encerradosContrario(Board, Player, R, C, Adyacentes, Vistos, Encerrados).
 
 %Caso recursivo 3, adyacente es del color opuesto pero no lo visité, miro si esta encerrado y paso al siguiente adyacente
 encerradosContrario(Board, Player, R, C, [[Ficha, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
 	Ficha \= Player,
 	Ficha \= "-",
 	adyacentes(Board, Ficha, RAd, CAd, AdyacentesAd),
-	encerrados(Board, Ficha, RAd, CAd, AdyacentesAd, [[Ficha, RAd, CAd]|Vistos], Encerrados1),
-	append(EncerradosAd, Vistos, NuevosVistos),
+	encerrados(Board, Ficha, RAd, CAd, AdyacentesAd, [[Ficha, RAd, CAd]], Encerrados1),
+	append(Encerrados1, Vistos, NuevosVistos),
 	encerradosContrario(Board, Player, R, C, Adyacentes, [[Ficha, RAd, CAd]|NuevosVistos], Encerrados2),
 	append(Encerrados1, Encerrados2, Encerrados).
 	
@@ -148,12 +160,5 @@ encerradosContrario(Board, Player, R, C, [[Ficha, RAd, CAd]|Adyacentes], Vistos,
 encerradosContrario(Board, Player, R, C, [[Ficha, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
 	Ficha \= Player,
 	Ficha \= "-",
-	adyacentes(Board, Ficha, RAd, CAd, AdyacentesAd),
 	encerradosContrario(Board, Player, R, C, Adyacentes, [[Ficha, RAd, CAd]|Vistos], Encerrados).
 
-eliminarEncerrados(Board, [], Board).
-
-eliminarEncerrados(Board, [[Ficha, Fila, Columna]|AEliminar], NBoard):-
-    replace(Row, Fila, NRow, Board, RBoard),
-    replace(Ficha, Columna, "-", Row, NRow),
-    eliminarEncerrados(RBoard, AEliminar, NBoard).
