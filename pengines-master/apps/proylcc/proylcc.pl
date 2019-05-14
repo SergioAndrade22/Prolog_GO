@@ -46,9 +46,9 @@ goMove(Board, Player, [R,C], RBoard):-
     replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
 	adyacentes(RBoard,Player, R, C,ListaAdyacentes),
-	\+(encerrados(RBoard, Player, R, C, ListaAdyacentes, [[Player,R,C]], ListaEncerrados)).
+	\+(encerrados(RBoard, Player, R, C, ListaAdyacentes, [[Player,R,C]], _ListaEncerrados)).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % replace(?X, +XIndex, +Y, +Xs, -XsY)
 %
@@ -60,8 +60,15 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
     XIndexS is XIndex - 1,
     replace(X, XIndexS, Y, Xs, XsY).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Mediante la consulta opPlayer(+X, ?Y) permite saber si cual es el jugador opuesto a X
+
 opPlayer("w", "b").
 opPlayer("b", "w").
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%	Metodo recursivo que permite eliminar los elementos presentes en una lista del tablero
+%	eliminar (+Board, +AEliminar, ?NBoard)
 
 eliminarEncerrados(Board, [], Board).
 
@@ -70,7 +77,9 @@ eliminarEncerrados(Board, [[Ficha, Fila, Columna]|AEliminar], NBoard):-
     replace(Ficha, Columna, "-", Row, NRow),
     eliminarEncerrados(RBoard, AEliminar, NBoard).
 
-%Adyacentes tomi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%	Perimite obtener una lista conteniendo todos los adyacentes de una posicion dada
+%	
 adyacentes(Board, Player, Fila, Columna, [[FichaArriba, IndexArriba, Columna], [FichaAbajo, IndexAbajo, Columna], [FichaDerecha, Fila, IndexDerecha], [FichaIzquierda, Fila, IndexIzquierda]]):-
 	IndexArriba is Fila - 1, IndexAbajo is Fila + 1, IndexDerecha is Columna + 1, IndexIzquierda is Columna - 1,
 	%Obtiene la ficha adyacente arriba
@@ -119,7 +128,7 @@ encerrados(Board, Player, R, C, [[Player2, _RAd, _CAd]|Adyacentes], Vistos, Ence
 	Player2 \= "-",
 	encerrados(Board, Player, R, C, Adyacentes, Vistos, Encerrados).
 
-%%EncerradosContrarios Hecho por tomi, no termina de funcionar
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Caso base, no me quedan adyacentes por revisar
 encerradosContrario(_Board, _Player, _R, _C, [], _Vistos, []).
@@ -154,3 +163,56 @@ encerradosContrario(Board, Player, R, C, [[Ficha, RAd, CAd]|Adyacentes], Vistos,
 	Ficha \= Player,
 	Ficha \= "-",
 	encerradosContrario(Board, Player, R, C, Adyacentes, [[Ficha, RAd, CAd]|Vistos], Encerrados).
+%encerradosTerreno(_Board, "-", F, C, _Player, Vistos,Encerrados).
+%Devuelve si un espacio vacio esta encerrado y retorna sus encerrados conectados.
+%Caso Base: llego sin adyacentes por lo q ese espacio está encerrado.
+encerradosTerreno(_Board, "-", F, C, _Player, [], [	["-", F, C]]).
+%Caso recursivo 1: El primer elemento de los adyacente coincide con el jugador por lo q no reviso el mismo y sigo con los demas adyacentes
+encerradosTerreno(Board, "-", F, C, Player, [[Player, Fila, Columna]|Adyacentes], Vistos, [["-", F, C]|Encerrados]) :-
+	encerradosTerreno(Board, "-", F, C, Adyacentes, [["-", Fila, Columna]| Vistos], Encerrados).
+%Caso recursivo 2: El primer elemento de los adyacentes ya fue revisado por lo q continuo con los demas
+encerradosTerreno(Board, "-", F, C, Player, [["-", Fila, Columna]|Adyacentes], Vistos, Encerrados) :-
+	member(["-", Fila, Columna], Vistos),
+	encerradosTerreno(Board, "-", F, C, Player, Adyacentes, Vistos, Encerrados).
+%Caso recursivo 3: El primer elemento de los adyacentes es un vacio no visitados por lo q debo verificar si esta encerrado.
+encerradosTerreno(Board, "-", F, C, Player, [["-", Fila, Columna]|Adyacentes], Vistos, [["-", F, C]|Encerrados]) :-
+	\+(member(["-", Fila, Columna], Vistos)),
+	adyacentes(Board, "-", Fila, Columna, NAdyacentes),
+	encerradosTerreno(Board, "-", Fila, Columna, Player, NAdyacentes, [["-", F, C], ["-", Fila, Columna]], NEncerrados),
+	append(Vistos,NEncerrados,VistosAux),
+	encerradosTerreno(Board, "-", F, C, Player, Adyacentes, [["-", Fila, Columna]|VistosAux], Encerrados2),
+	append(NEncerrados, Encerrados2, Encerrados).
+
+aplanarVacios(Board, -1, []).
+
+aplanarVacios(Board, F, Lista) :-
+	FAux is F - 1,
+	aplanarVacios(Board, FAux, ListaListas),
+	getElem(Fila, F, Board),
+	obtenerTernas(Fila,F,18,ListaTernas),
+	append(ListaListas,ListaTernas,Lista).
+
+obtenerTernas(Fila,F,-1,[]).
+
+obtenerTernas(Fila,F,Index,[[Ficha,F,Index]|Lista]):-
+	IndexAux is Index -1,
+	getElem(Ficha,Index,Fila),
+	Ficha = "-",
+	obtenerTernas(Fila,F,IndexAux,Lista).
+
+obtenerTernas(Fila,F,Index,Lista):-
+	IndexAux is Index -1,
+	obtenerTernas(Fila,F,IndexAux,Lista).
+	
+terminarJuego(Board,PuntosW,PuntosB):-
+	aplanarVacios(Board,18,Vacios),
+	.
+
+contarPuntos(Board,Player,Vistos,[]).
+contarPuntos(Board,Player,[["-",F,C]|Vacios],ListaEncerradosTerreno):-
+	contarPuntos(Board,Player,[["-",F,C]|Vacios],Vistos,EncerradosVistos),
+	adyacentes(Board, "-", F, C, Adyacentes),
+	encerradosTerreno(Board, "-", F, C, Player, Adyacentes,EncerradosVistos,Encerradosterreno),
+
+
+	.

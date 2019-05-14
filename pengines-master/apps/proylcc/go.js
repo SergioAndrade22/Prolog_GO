@@ -86,7 +86,8 @@ function handleSuccess(response) {
 		countB = 0;
 	else 
 		countW = 0;
-    switchTurn();
+    turnBlack = !turnBlack;
+    bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
 }
 
 /**
@@ -110,6 +111,14 @@ function handleClick(row, col) {
 function switchTurn() {
     turnBlack = !turnBlack;
     bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
+
+    if(turnBlack)
+        countB++;
+    else
+        countW++;
+    
+    if(countB === 2 || countW === 2)
+        finish();
 }
 
 /**
@@ -120,20 +129,6 @@ function switchTurn() {
 function keyEvent(event){
 	var key = event.key;
 	if(key === "p" || key === "p") passTurn();
-}	
-
-function passTurn(){
-	
-	if(turnBlack)
-		countB++;
-	else
-		countW++;
-	
-	if(countB === 2 || countW === 2)
-		finish();
-	else
-		switchTurn();
-	
 }
 
 function finish(){
