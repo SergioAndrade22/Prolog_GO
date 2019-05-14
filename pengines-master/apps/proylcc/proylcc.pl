@@ -1,20 +1,20 @@
-:- module(proylcc,
-	[  
-		emptyBoard/1,
-		goMove/4
-	]).
+%:- module(proylcc,
+%	[  
+%		emptyBoard/1,
+%		goMove/4
+%	]).
 
 emptyBoard([
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","b","b","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","b","-","-","b","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","b","b","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","-","-","-","w","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","-","-","w","-","w","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","-","-","-","w","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
@@ -163,27 +163,27 @@ encerradosContrario(Board, Player, R, C, [[Ficha, RAd, CAd]|Adyacentes], Vistos,
 	Ficha \= Player,
 	Ficha \= "-",
 	encerradosContrario(Board, Player, R, C, Adyacentes, [[Ficha, RAd, CAd]|Vistos], Encerrados).
-%encerradosTerreno(_Board, "-", F, C, _Player, Vistos,Encerrados).
-%Devuelve si un espacio vacio esta encerrado y retorna sus encerrados conectados.
-%Caso Base: llego sin adyacentes por lo q ese espacio está encerrado.
-encerradosTerreno(_Board, "-", F, C, _Player, [], [	["-", F, C]]).
-%Caso recursivo 1: El primer elemento de los adyacente coincide con el jugador por lo q no reviso el mismo y sigo con los demas adyacentes
-encerradosTerreno(Board, "-", F, C, Player, [[Player, Fila, Columna]|Adyacentes], Vistos, [["-", F, C]|Encerrados]) :-
-	encerradosTerreno(Board, "-", F, C, Adyacentes, [["-", Fila, Columna]| Vistos], Encerrados).
-%Caso recursivo 2: El primer elemento de los adyacentes ya fue revisado por lo q continuo con los demas
-encerradosTerreno(Board, "-", F, C, Player, [["-", Fila, Columna]|Adyacentes], Vistos, Encerrados) :-
-	member(["-", Fila, Columna], Vistos),
-	encerradosTerreno(Board, "-", F, C, Player, Adyacentes, Vistos, Encerrados).
-%Caso recursivo 3: El primer elemento de los adyacentes es un vacio no visitados por lo q debo verificar si esta encerrado.
-encerradosTerreno(Board, "-", F, C, Player, [["-", Fila, Columna]|Adyacentes], Vistos, [["-", F, C]|Encerrados]) :-
-	\+(member(["-", Fila, Columna], Vistos)),
-	adyacentes(Board, "-", Fila, Columna, NAdyacentes),
-	encerradosTerreno(Board, "-", Fila, Columna, Player, NAdyacentes, [["-", F, C], ["-", Fila, Columna]], NEncerrados),
-	append(Vistos,NEncerrados,VistosAux),
-	encerradosTerreno(Board, "-", F, C, Player, Adyacentes, [["-", Fila, Columna]|VistosAux], Encerrados2),
-	append(NEncerrados, Encerrados2, Encerrados).
 
-aplanarVacios(Board, -1, []).
+%Caso Base, cuando no quedan mas adyacentes por revisar, asumo que estoy encerrado
+encerradosVacios(_Board, Vacio, _Player, R, C, [], _Vistos, [[Vacio,R,C]]).
+
+encerradosVacios(Board, Vacio, Player, R, C, [[Vacio, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
+	\+(member([Vacio, RAd, CAd], Vistos)),
+	adyacentes(Board, Vacio, RAd, CAd, RAdyacentes),
+	encerradosVacios(Board, Vacio, Player, RAd, CAd, RAdyacentes, [[Vacio,RAd,CAd]|Vistos], EncerradosAd),
+	append([[Vacio,RAd,CAd]|Vistos], EncerradosAd, VistosAux),
+	encerradosVacios(Board, Vacio, Player, R, C, Adyacentes, VistosAux,EncerradosP),
+	append(EncerradosP,EncerradosAd,Encerrados).
+
+encerradosVacios(Board, Vacio, Player, R, C, [[Vacio, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
+	member([Vacio, RAd, CAd],Vistos),
+	encerradosVacios(Board, Vacio, Player, R, C, Adyacentes, Vistos, Encerrados).
+	
+encerradosVacios(Board, Vacio, Player, R, C, [[Player, _RAd, _CAd]|Adyacentes], Vistos, Encerrados):-
+	Vacio \= Player,
+	encerradosVacios(Board, Vacio,Player, R, C, Adyacentes, Vistos, Encerrados).
+
+aplanarVacios(_Board, -1, []).
 
 aplanarVacios(Board, F, Lista) :-
 	FAux is F - 1,
@@ -192,7 +192,7 @@ aplanarVacios(Board, F, Lista) :-
 	obtenerTernas(Fila,F,18,ListaTernas),
 	append(ListaListas,ListaTernas,Lista).
 
-obtenerTernas(Fila,F,-1,[]).
+obtenerTernas(_Fila,_F,-1,[]).
 
 obtenerTernas(Fila,F,Index,[[Ficha,F,Index]|Lista]):-
 	IndexAux is Index -1,
@@ -203,16 +203,19 @@ obtenerTernas(Fila,F,Index,[[Ficha,F,Index]|Lista]):-
 obtenerTernas(Fila,F,Index,Lista):-
 	IndexAux is Index -1,
 	obtenerTernas(Fila,F,IndexAux,Lista).
-	
+
 terminarJuego(Board,PuntosW,PuntosB):-
 	aplanarVacios(Board,18,Vacios),
-	.
+	contarPuntos(Board,"b",Vacios,[],EncerradosB),
+	contarPuntos(Board,"w",Vacios,[],EncerradosW),
+	length(EncerradosB,PuntosB),
+	length(EncerradosW,PuntosW).
 
-contarPuntos(Board,Player,Vistos,[]).
+contarPuntos(_Board,_Player,[],_Vistos,[]).
+
 contarPuntos(Board,Player,[["-",F,C]|Vacios],ListaEncerradosTerreno):-
-	contarPuntos(Board,Player,[["-",F,C]|Vacios],Vistos,EncerradosVistos),
 	adyacentes(Board, "-", F, C, Adyacentes),
-	encerradosTerreno(Board, "-", F, C, Player, Adyacentes,EncerradosVistos,Encerradosterreno),
-
-
-	.
+	encerradosVacios(Board, F, C, "-",Player, Adyacentes,[["-",F,C]|Vistos], EncerradosTerreno),
+	append(Vistos,EncerradosTerreno,EncerradosVistos),
+	contarPuntos(Board,Player,Vacios,[["-",F,C]|EncerradosVistos],Encerrados),
+	append(Encerrados,EncerradosTerreno,ListaEncerradosTerreno).
