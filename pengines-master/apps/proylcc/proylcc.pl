@@ -215,7 +215,7 @@ contarPuntos(_Board,_Player,[],_Vistos,[]).
 
 contarPuntos(Board,Player,[["-",F,C]|Vacios],ListaEncerradosTerreno):-
 	adyacentes(Board, "-", F, C, Adyacentes),
-	encerradosVacios(Board, F, C, "-",Player, Adyacentes,[["-",F,C]|Vistos], EncerradosTerreno),
+	encerradosVacios(Board, "-", Player, F, C, Adyacentes,[["-",F,C]|Vistos], EncerradosTerreno),
 	append(Vistos,EncerradosTerreno,EncerradosVistos),
 	contarPuntos(Board,Player,Vacios,[["-",F,C]|EncerradosVistos],Encerrados),
 	append(Encerrados,EncerradosTerreno,ListaEncerradosTerreno).
