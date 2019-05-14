@@ -1,8 +1,8 @@
-:- module(proylcc,
-	[  
-		emptyBoard/1,
-		goMove/4
-	]).
+%:- module(proylcc,
+%	[  
+%		emptyBoard/1,
+%		goMove/4
+%	]).
 
 emptyBoard([
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
@@ -12,9 +12,9 @@ emptyBoard([
 		 ["-","-","-","b","b","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","w","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","w","-","w","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","w","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
@@ -36,16 +36,16 @@ emptyBoard([
 goMove(Board, Player, [R,C], NBoard):-
 	replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
-	adyacentes(RBoard,Player, R, C,ListaAdyacentes),
+	adyacentes(RBoard, R, C,ListaAdyacentes),
 	encerradosContrario(RBoard, Player, R, C,ListaAdyacentes, [[Player,R,C]], ListaEncerradosContrarios),
 	eliminarEncerrados(RBoard, ListaEncerradosContrarios, NBoard),
-	adyacentes(NBoard, Player, R, C, NListaAdyacentes),
+	adyacentes(NBoard, R, C, NListaAdyacentes),
 	\+(encerrados(NBoard, Player, R, C, NListaAdyacentes, [[Player,R,C]], _ListaEncerrados)).
 
 goMove(Board, Player, [R,C], RBoard):-
     replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
-	adyacentes(RBoard,Player, R, C,ListaAdyacentes),
+	adyacentes(RBoard, R, C,ListaAdyacentes),
 	\+(encerrados(RBoard, Player, R, C, ListaAdyacentes, [[Player,R,C]], _ListaEncerrados)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -61,12 +61,6 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
     replace(X, XIndexS, Y, Xs, XsY).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Mediante la consulta opPlayer(+X, ?Y) permite saber si cual es el jugador opuesto a X
-
-opPlayer("w", "b").
-opPlayer("b", "w").
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Metodo recursivo que permite eliminar los elementos presentes en una lista del tablero
 %	eliminar (+Board, +AEliminar, ?NBoard)
 
@@ -80,22 +74,30 @@ eliminarEncerrados(Board, [[Ficha, Fila, Columna]|AEliminar], NBoard):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Perimite obtener una lista conteniendo todos los adyacentes de una posicion dada
 %	
-adyacentes(Board, Player, Fila, Columna, [[FichaArriba, IndexArriba, Columna], [FichaAbajo, IndexAbajo, Columna], [FichaDerecha, Fila, IndexDerecha], [FichaIzquierda, Fila, IndexIzquierda]]):-
+
+obtenerAdyacente(_Board, 19, _Columna, []).
+obtenerAdyacente(_Board, -1, _Columna, []).
+obtenerAdyacente(_Board, _Fila, 19, []).
+obtenerAdyacente(_Board, _Fila, -1, []).
+obtenerAdyacente(_Board, 19, 19, []).
+obtenerAdyacente(_Board, -1, -1, []).
+obtenerAdyacente(Board, Fila, Columna, [[Ficha,Fila,Columna]]):-
+	Fila \= 19,
+	Fila \= -1,
+	Columna \= 19,
+	Columna \= -1,
+	getElem(F, Fila, Board), 
+	getElem(Ficha, Columna, F).
+
+adyacentes(Board, Fila, Columna, Adyacentes):-
 	IndexArriba is Fila - 1, IndexAbajo is Fila + 1, IndexDerecha is Columna + 1, IndexIzquierda is Columna - 1,
-	%Obtiene la ficha adyacente arriba
-	((IndexArriba < 0 , opPlayer(Player, FichaArriba));
-		(getElem(FilaArriba, IndexArriba, Board), getElem(FichaArriba, Columna, FilaArriba))),
-	%Obtiene la ficha adyacente abajo
-	((IndexAbajo > 18, opPlayer(Player, FichaAbajo));
-		(getElem(FilaAbajo, IndexAbajo, Board), getElem(FichaAbajo, Columna, FilaAbajo))),
-	%%Obtiene la fila actual
-	getElem(FilaActual, Fila, Board),
-	%Obtiene la ficha adyacente derecha
-	((IndexDerecha > 18, opPlayer(Player, FichaDerecha));
-		getElem(FichaDerecha, IndexDerecha, FilaActual)),
-	%Obtiene la ficha adyacente izquierda
-	((IndexIzquierda < 0, opPlayer(Player, FichaIzquierda));
-		getElem(FichaIzquierda, IndexIzquierda, FilaActual)).
+	obtenerAdyacente(Board, IndexArriba, Columna, FichaArriba),
+	obtenerAdyacente(Board, IndexAbajo, Columna, FichaAbajo),
+	obtenerAdyacente(Board, Fila, IndexIzquierda, FichaIzquierda),
+	obtenerAdyacente(Board, Fila, IndexDerecha, FichaDerecha),
+	append(FichaArriba,FichaAbajo,ArribaAbajo),
+	append(FichaIzquierda,FichaDerecha,IzquierdaDerecha),
+	append(ArribaAbajo,IzquierdaDerecha,Adyacentes).
 
 getElem(X, 0, [X|_Xs]).
 
@@ -111,7 +113,7 @@ encerrados(_Board, Player, R, C, [], _Vistos, [[Player,R,C]]).
 %Caso recursivo, donde el siguiente adyacente es del mismo color, chequeo si esta encerrado y sus adyacentes, y reviso el resto de mis adyacentes
 encerrados(Board, Player, R, C, [[Player, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
 	\+(member([Player, RAd, CAd], Vistos)),
-	adyacentes(Board, Player, RAd, CAd, RAdyacentes),
+	adyacentes(Board, RAd, CAd, RAdyacentes),
 	encerrados(Board, Player, RAd, CAd, RAdyacentes, [[Player,RAd,CAd]|Vistos], EncerradosAd),
 	append([[Player,RAd,CAd]|Vistos], EncerradosAd, VistosAux),
 	encerrados(Board, Player, R, C, Adyacentes, VistosAux,EncerradosP),
@@ -152,7 +154,7 @@ encerradosContrario(Board, Player,R,C,[[Ficha, RAd, CAd]|Adyacentes], Vistos, En
 encerradosContrario(Board, Player, R, C, [[Ficha, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
 	Ficha \= Player,
 	Ficha \= "-",
-	adyacentes(Board, Ficha, RAd, CAd, AdyacentesAd),
+	adyacentes(Board, RAd, CAd, AdyacentesAd),
 	encerrados(Board, Ficha, RAd, CAd, AdyacentesAd, [[Ficha, RAd, CAd]], Encerrados1),
 	append(Encerrados1, Vistos, NuevosVistos),
 	encerradosContrario(Board, Player, R, C, Adyacentes, [[Ficha, RAd, CAd]|NuevosVistos], Encerrados2),
@@ -169,7 +171,7 @@ encerradosVacios(_Board, Vacio, _Player, R, C, [], _Vistos, [[Vacio,R,C]]).
 
 encerradosVacios(Board, Vacio, Player, R, C, [[Vacio, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
 	\+(member([Vacio, RAd, CAd], Vistos)),
-	adyacentes(Board, Vacio, RAd, CAd, RAdyacentes),
+	adyacentes(Board, RAd, CAd, RAdyacentes),
 	encerradosVacios(Board, Vacio, Player, RAd, CAd, RAdyacentes, [[Vacio,RAd,CAd]|Vistos], EncerradosAd),
 	append([[Vacio,RAd,CAd]|Vistos], EncerradosAd, VistosAux),
 	encerradosVacios(Board, Vacio, Player, R, C, Adyacentes, VistosAux,EncerradosP),
@@ -192,30 +194,35 @@ aplanarVacios(Board, F, Lista) :-
 	obtenerTernas(Fila,F,18,ListaTernas),
 	append(ListaListas,ListaTernas,Lista).
 
-obtenerTernas(_Fila,_F,-1,[]).
+obtenerTernas(_Fila, _F, -1, []).
 
-obtenerTernas(Fila,F,Index,[[Ficha,F,Index]|Lista]):-
+obtenerTernas(Fila, F, Index, [[Ficha,F,Index]|Lista]):-
 	IndexAux is Index -1,
-	getElem(Ficha,Index,Fila),
+	getElem(Ficha, Index, Fila),
 	Ficha = "-",
-	obtenerTernas(Fila,F,IndexAux,Lista).
+	obtenerTernas(Fila, F, IndexAux, Lista).
 
-obtenerTernas(Fila,F,Index,Lista):-
+obtenerTernas(Fila, F, Index, Lista):-
 	IndexAux is Index -1,
-	obtenerTernas(Fila,F,IndexAux,Lista).
+	obtenerTernas(Fila, F, IndexAux, Lista).
 
-terminarJuego(Board,PuntosW,PuntosB):-
-	aplanarVacios(Board,18,Vacios),
-	contarPuntos(Board,"b",Vacios,[],EncerradosB),
-	contarPuntos(Board,"w",Vacios,[],EncerradosW),
-	length(EncerradosB,PuntosB),
-	length(EncerradosW,PuntosW).
+terminarJuego(Board, PuntosW, PuntosB):-
+	aplanarVacios(Board, 18, Vacios),
+	contarPuntos(Board, "b", Vacios, [], EncerradosB),
+	contarPuntos(Board, "w", Vacios, [], EncerradosW),
+	length(EncerradosB, PuntosB),
+	length(EncerradosW, PuntosW).
 
-contarPuntos(_Board,_Player,[],_Vistos,[]).
+contarPuntos(_Board, _Player, [], _Vistos, []).
 
-contarPuntos(Board,Player,[["-",F,C]|Vacios],ListaEncerradosTerreno):-
-	adyacentes(Board, "-", F, C, Adyacentes),
-	encerradosVacios(Board, "-", Player, F, C, Adyacentes,[["-",F,C]|Vistos], EncerradosTerreno),
-	append(Vistos,EncerradosTerreno,EncerradosVistos),
-	contarPuntos(Board,Player,Vacios,[["-",F,C]|EncerradosVistos],Encerrados),
-	append(Encerrados,EncerradosTerreno,ListaEncerradosTerreno).
+contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):-
+	\+(member(["-",F,C], Vistos)),
+	adyacentes(Board, F, C, Adyacentes),
+	encerradosVacios(Board, "-", Player, F, C, Adyacentes, [["-",F,C]|Vistos], EncerradosTerreno),
+	append(Vistos, EncerradosTerreno, EncerradosVistos),
+	contarPuntos(Board, Player, Vacios, [["-",F,C]|EncerradosVistos], Encerrados),
+	append(Encerrados, EncerradosTerreno, ListaEncerradosTerreno).
+	
+contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):-
+	(member(["-",F,C], Vistos)),
+	contarPuntos(Board, Player, Vacios, [["-",F,C]|Vistos], ListaEncerradosTerreno).
