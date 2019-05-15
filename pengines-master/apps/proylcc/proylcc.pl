@@ -1,15 +1,15 @@
-%:- module(proylcc,
-%	[  
-%		emptyBoard/1,
-%		goMove/4
-%	]).
+:- module(proylcc,
+	[  
+		emptyBoard/1,
+		goMove/4
+	]).
 
 emptyBoard([
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","b","b","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","b","-","-","b","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","b","b","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
@@ -173,8 +173,8 @@ encerradosVacios(Board, Vacio, Player, R, C, [[Vacio, RAd, CAd]|Adyacentes], Vis
 	\+(member([Vacio, RAd, CAd], Vistos)),
 	adyacentes(Board, RAd, CAd, RAdyacentes),
 	encerradosVacios(Board, Vacio, Player, RAd, CAd, RAdyacentes, [[Vacio,RAd,CAd]|Vistos], EncerradosAd),
-	append([[Vacio,RAd,CAd]|Vistos], EncerradosAd, VistosAux),
-	encerradosVacios(Board, Vacio, Player, R, C, Adyacentes, VistosAux,EncerradosP),
+	append(Vistos, EncerradosAd, VistosAux),
+	encerradosVacios(Board, Vacio, Player, R, C, Adyacentes, VistosAux ,EncerradosP),
 	append(EncerradosP,EncerradosAd,Encerrados).
 
 encerradosVacios(Board, Vacio, Player, R, C, [[Vacio, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
@@ -213,16 +213,18 @@ terminarJuego(Board, PuntosW, PuntosB):-
 	length(EncerradosB, PuntosB),
 	length(EncerradosW, PuntosW).
 
+%Caso base: No me quedan vacios por revisar
 contarPuntos(_Board, _Player, [], _Vistos, []).
 
+%Caso recursivo 1: El siguiente Vacio por revisar todavia no lo visité, y reviso si esta encerrado y si lo está sigo con los demas
 contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):-
 	\+(member(["-",F,C], Vistos)),
 	adyacentes(Board, F, C, Adyacentes),
-	encerradosVacios(Board, "-", Player, F, C, Adyacentes, [["-",F,C]|Vistos], EncerradosTerreno),
+	encerradosVacios(Board, "-", Player, F, C, Adyacentes, [["-",F,C]], EncerradosTerreno),
 	append(Vistos, EncerradosTerreno, EncerradosVistos),
 	contarPuntos(Board, Player, Vacios, [["-",F,C]|EncerradosVistos], Encerrados),
 	append(Encerrados, EncerradosTerreno, ListaEncerradosTerreno).
-	
+
+%Caso recursivo 2: El siguiente en la lista ya fue revisado, O no esta encerrado
 contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):-
-	(member(["-",F,C], Vistos)),
 	contarPuntos(Board, Player, Vacios, [["-",F,C]|Vistos], ListaEncerradosTerreno).
