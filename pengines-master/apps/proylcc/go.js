@@ -1,4 +1,4 @@
-// Reference to object provided by pengines.js library which interfaces with Pengines server (Prolog-engine)
+ // Reference to object provided by pengines.js library which interfaces with Pengines server (Prolog-engine)
 // by making query requests and receiving answers.
 var pengine;
 // Bidimensional array representing board configuration.
@@ -13,8 +13,6 @@ var countB = 0;
 var countW = 0;
 var scoreB = 0;
 var scoreW = 0;
-
-
 
 /**
 * Initialization function. Requests to server, through pengines.js library, 
@@ -67,7 +65,6 @@ function createBoard() {
 /**
  * Callback for Pengine server creation
  */
-
 function handleCreate() {
     pengine.ask('emptyBoard(Board)');
 }
@@ -75,7 +72,6 @@ function handleCreate() {
 /**
  * Callback for successful response received from Pengines server.
  */
-
 function handleSuccess(response) {
     gridData = response.data[0].Board;
 	if(gridData != undefined) {
@@ -93,15 +89,11 @@ function handleSuccess(response) {
 		bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
 	}
 	else {
-		
 		scoreB = response.data[0].PuntosB;
 		scoreW = response.data[0].PuntosW;
 		if((scoreB != undefined) && (scoreW != undefined)){
-			
 			alert("Fin del juego! Blanco: "+scoreW+" Negro: "+scoreB);
-			
 		}
-	
 	}
 }
 
@@ -124,7 +116,6 @@ function handleClick(row, col) {
 }
 
 function switchTurn() {
-	
     if(turnBlack){
 		countB++;
 		if(countB === 2){
@@ -139,14 +130,13 @@ function switchTurn() {
 	}
 	turnBlack = !turnBlack;
     bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
-
 }
 
 function finish(){
 	alert("Finish");
 	var s = turnBlack ? "White" : "Black";
 	//Aca vamos a armar el predicado para mandarle al prolog
-	const c = "terminarJuego("+Pengine.stringify(gridData)+",PuntosB,PuntosW)";
+	const c = "terminarJuego("+Pengine.stringify(gridData)+",PuntosW,PuntosB)";
 	pengine.ask(c);
 }
 /**
