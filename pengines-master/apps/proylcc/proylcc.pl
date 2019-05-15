@@ -1,7 +1,8 @@
 :- module(proylcc,
 	[  
 		emptyBoard/1,
-		goMove/4
+		goMove/4,
+		terminarJuego/3
 	]).
 
 emptyBoard([

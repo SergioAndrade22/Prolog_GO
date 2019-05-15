@@ -11,6 +11,8 @@ var bodyElem;
 var latestStone;
 var countB = 0;
 var countW = 0;
+var scoreB = 0;
+var scoreW = 0;
 
 
 
@@ -76,18 +78,31 @@ function handleCreate() {
 
 function handleSuccess(response) {
     gridData = response.data[0].Board;
-    for (let row = 0; row < gridData.length; row++)
-        for (let col = 0; col < gridData[row].length; col++) {
-            cellElems[row][col].className = "gridCell" +
-                (gridData[row][col] === "w" ? " stoneWhite" : gridData[row][col] === "b" ? " stoneBlack" : "") +
-                (latestStone && row === latestStone[0] && col === latestStone[1] ? " latest" : "");
-        }
-	if(turnBlack) 
-		countB = 0;
-	else 
-		countW = 0;
-    turnBlack = !turnBlack;
-    bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
+	if(gridData != undefined) {
+		for (let row = 0; row < gridData.length; row++)
+			for (let col = 0; col < gridData[row].length; col++) {
+				cellElems[row][col].className = "gridCell" +
+					(gridData[row][col] === "w" ? " stoneWhite" : gridData[row][col] === "b" ? " stoneBlack" : "") +
+					(latestStone && row === latestStone[0] && col === latestStone[1] ? " latest" : "");
+			}
+		if(turnBlack) 
+			countB = 0;
+		else 
+			countW = 0;
+		turnBlack = !turnBlack;
+		bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
+	}
+	else {
+		
+		scoreB = response.data[0].PuntosB;
+		scoreW = response.data[0].PuntosW;
+		if((scoreB != undefined) && (scoreW != undefined)){
+			
+			alert("Fin del juego! Blanco: "+scoreW+" Negro: "+scoreB);
+			
+		}
+	
+	}
 }
 
 /**
@@ -109,49 +124,33 @@ function handleClick(row, col) {
 }
 
 function switchTurn() {
-    turnBlack = !turnBlack;
-    bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
-
+	
     if(turnBlack){
-        countB++;
-		if(countB === 2) finish();
+		countB++;
+		if(countB === 2){
+			finish();
+		}
 	}
     else{
-        countW++;
-		if(countW === 2) finish();
+		countW++;
+		if(countW === 2){
+			finish();
+		}
 	}
+	turnBlack = !turnBlack;
+    bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
 
-        
 }
 
+function finish(){
+	alert("Finish");
+	var s = turnBlack ? "White" : "Black";
+	//Aca vamos a armar el predicado para mandarle al prolog
+	const c = "terminarJuego("+Pengine.stringify(gridData)+",PuntosB,PuntosW)";
+	pengine.ask(c);
+}
 /**
 * Call init function after window loaded to ensure all HTML was created before
 * accessing and manipulating it.
 */
-
-function keyEvent(event){
-	var key = event.key;
-	key = "r";
-	if(key === "p" || key === "p") {
-		turnBlack = !turnBlack;
-		bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
-
-		if(turnBlack)
-			countB++;
-		else
-			countW++;
-		if(countB === 2 || countW === 2)
-			finish();
-	}
-}
-
-function finish(){
-	var s = turnBlack ? "White" : "Black";
-	alert("Finish! " + s +" wins");
-	//Aca vamos a armar el predicado para mandarle al prolog
-	const c = "";
-	//pengine.ask(c);
-
-}
-
 window.onload = init;
