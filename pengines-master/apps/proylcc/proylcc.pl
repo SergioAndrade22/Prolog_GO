@@ -1,13 +1,13 @@
-:- module(proylcc,
-	[  
-		emptyBoard/1,
-		goMove/4,
-		terminarJuego/3
-	]).
+%:- module(proylcc,
+%	[  
+%		emptyBoard/1,
+%		goMove/4,
+%		terminarJuego/3
+%	]).
 
 emptyBoard([
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
@@ -225,7 +225,7 @@ contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):
 	adyacentes(Board, F, C, Adyacentes),
 	encerradosVacios(Board, "-", Player, F, C, Adyacentes, [["-",F,C]],Count, EncerradosTerreno),
 	length(EncerradosTerreno,CantidadVacios),
-	CantidadVacios < Count,
+	CantidadVacios =< Count,
 	append(Vistos, EncerradosTerreno, EncerradosVistos),
 	contarPuntos(Board, Player, Vacios, [["-",F,C]|EncerradosVistos], Encerrados),
 	append(Encerrados, EncerradosTerreno, ListaEncerradosTerreno).
