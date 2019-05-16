@@ -92,7 +92,15 @@ function handleSuccess(response) {
 		scoreB = response.data[0].PuntosB;
 		scoreW = response.data[0].PuntosW;
 		if((scoreB != undefined) && (scoreW != undefined)){
-			alert("Fin del juego! Blanco: "+scoreW+" Negro: "+scoreB);
+            if(scoreB != scoreW){
+                winer = (scoreW > scoreB) ? "Blanco" : "Negro";
+    			alert("Fin del juego! Blanco: "+scoreW+" Negro: "+scoreB + '\n'
+                    + "El ganador es el jugador: " + winer + ".");
+            }
+            else{
+                alert("Fin del juego! Blanco: "+scoreW+" Negro: "+scoreB + '\n'
+                    + "El juego concluye en empate.");
+            }
 		}
 	}
 }
@@ -118,13 +126,13 @@ function handleClick(row, col) {
 function switchTurn() {
     if(turnBlack){
 		countB++;
-		if(countB === 2){
+		if(countB === 1 && countW === 1){
 			finish();
 		}
 	}
     else{
 		countW++;
-		if(countW === 2){
+		if(countW === 1 && countB === 1){
 			finish();
 		}
 	}
@@ -135,7 +143,6 @@ function switchTurn() {
 function finish(){
 	alert("Finish");
 	var s = turnBlack ? "White" : "Black";
-	//Aca vamos a armar el predicado para mandarle al prolog
 	const c = "terminarJuego("+Pengine.stringify(gridData)+",PuntosW,PuntosB)";
 	pengine.ask(c);
 }
