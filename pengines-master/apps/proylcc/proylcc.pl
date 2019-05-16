@@ -168,23 +168,25 @@ encerradosContrario(Board, Player, R, C, [[Ficha, RAd, CAd]|Adyacentes], Vistos,
 	encerradosContrario(Board, Player, R, C, Adyacentes, [[Ficha, RAd, CAd]|Vistos], Encerrados).
 
 %Caso Base, cuando no quedan mas adyacentes por revisar, asumo que estoy encerrado
-encerradosVacios(_Board, Vacio, _Player, R, C, [], _Vistos, [[Vacio,R,C]]).
+encerradosVacios(_Board, Vacio, _Player, R, C, [], _Vistos, 0, [[Vacio,R,C]]).
 
-encerradosVacios(Board, Vacio, Player, R, C, [[Vacio, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
+encerradosVacios(Board, Vacio, Player, R, C, [[Vacio, RAd, CAd]|Adyacentes], Vistos, Count,Encerrados):-
 	\+(member([Vacio, RAd, CAd], Vistos)),
 	adyacentes(Board, RAd, CAd, RAdyacentes),
-	encerradosVacios(Board, Vacio, Player, RAd, CAd, RAdyacentes, [[Vacio,RAd,CAd]|Vistos], EncerradosAd),
+	encerradosVacios(Board, Vacio, Player, RAd, CAd, RAdyacentes, [[Vacio,RAd,CAd]|Vistos],CountP, EncerradosAd),
 	append(Vistos, EncerradosAd, VistosAux),
-	encerradosVacios(Board, Vacio, Player, R, C, Adyacentes, VistosAux ,EncerradosP),
+	encerradosVacios(Board, Vacio, Player, R, C, Adyacentes, VistosAux ,CountR,EncerradosP),
+	Count is (CountR + CountP),
 	append(EncerradosP,EncerradosAd,Encerrados).
 
-encerradosVacios(Board, Vacio, Player, R, C, [[Vacio, RAd, CAd]|Adyacentes], Vistos, Encerrados):-
+encerradosVacios(Board, Vacio, Player, R, C, [[Vacio, RAd, CAd]|Adyacentes], Vistos, Count,Encerrados):-
 	member([Vacio, RAd, CAd],Vistos),
-	encerradosVacios(Board, Vacio, Player, R, C, Adyacentes, Vistos, Encerrados).
+	encerradosVacios(Board, Vacio, Player, R, C, Adyacentes, Vistos, Count,Encerrados).
 	
-encerradosVacios(Board, Vacio, Player, R, C, [[Player, _RAd, _CAd]|Adyacentes], Vistos, Encerrados):-
+encerradosVacios(Board, Vacio, Player, R, C, [[Player, _RAd, _CAd]|Adyacentes], Vistos, Count,Encerrados):-
 	Vacio \= Player,
-	encerradosVacios(Board, Vacio,Player, R, C, Adyacentes, Vistos, Encerrados).
+	encerradosVacios(Board, Vacio,Player, R, C, Adyacentes, Vistos, CountR,Encerrados),
+	Count is (CountR + 1).
 
 aplanarVacios(_Board, -1, []).
 
@@ -221,10 +223,19 @@ contarPuntos(_Board, _Player, [], _Vistos, []).
 contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):-
 	\+(member(["-",F,C], Vistos)),
 	adyacentes(Board, F, C, Adyacentes),
-	encerradosVacios(Board, "-", Player, F, C, Adyacentes, [["-",F,C]], EncerradosTerreno),
+	encerradosVacios(Board, "-", Player, F, C, Adyacentes, [["-",F,C]],Count, EncerradosTerreno),
+	length(EncerradosTerreno,CantidadVacios),
+	CantidadVacios < Count,
 	append(Vistos, EncerradosTerreno, EncerradosVistos),
 	contarPuntos(Board, Player, Vacios, [["-",F,C]|EncerradosVistos], Encerrados),
 	append(Encerrados, EncerradosTerreno, ListaEncerradosTerreno).
+	
+contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):-
+	\+(member(["-",F,C], Vistos)),
+	adyacentes(Board, F, C, Adyacentes),
+	encerradosVacios(Board, "-", Player, F, C, Adyacentes, [["-",F,C]], _Count, EncerradosTerreno),
+	append(Vistos, EncerradosTerreno, EncerradosVistos),
+	contarPuntos(Board, Player, Vacios, [["-",F,C]|EncerradosVistos], ListaEncerradosTerreno).
 
 %Caso recursivo 2: El siguiente en la lista ya fue revisado, O no esta encerrado
 contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):-
