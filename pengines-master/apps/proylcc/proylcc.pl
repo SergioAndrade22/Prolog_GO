@@ -224,8 +224,6 @@ contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):
 	\+(member(["-",F,C], Vistos)),
 	adyacentes(Board, F, C, Adyacentes),
 	encerradosVacios(Board, "-", Player, F, C, Adyacentes, [["-",F,C]],Count, EncerradosTerreno),
-	length(EncerradosTerreno,CantidadVacios),
-	CantidadVacios =< Count,
 	append(Vistos, EncerradosTerreno, EncerradosVistos),
 	contarPuntos(Board, Player, Vacios, [["-",F,C]|EncerradosVistos], Encerrados),
 	append(Encerrados, EncerradosTerreno, ListaEncerradosTerreno).
