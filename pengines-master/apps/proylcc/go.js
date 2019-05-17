@@ -9,10 +9,9 @@ var cellElems;
 var turnBlack = false;
 var bodyElem;
 var latestStone;
-var countB = 0;
-var countW = 0;
 var scoreB = 0;
 var scoreW = 0;
+var pass = false;
 
 /**
 * Initialization function. Requests to server, through pengines.js library, 
@@ -81,10 +80,7 @@ function handleSuccess(response) {
 					(gridData[row][col] === "w" ? " stoneWhite" : gridData[row][col] === "b" ? " stoneBlack" : "") +
 					(latestStone && row === latestStone[0] && col === latestStone[1] ? " latest" : "");
 			}
-		if(turnBlack) 
-			countB = 0;
-		else 
-			countW = 0;
+		pass = false;
 		turnBlack = !turnBlack;
 		bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
 	}
@@ -99,7 +95,7 @@ function handleSuccess(response) {
             }
             else{
                 alert("Fin del juego! Blanco: "+scoreW+" Negro: "+scoreB + '\n'
-                    + "El juego concluye en empate.");
+                    + "Empate, Victoria del jugador Blanco.");
             }
 		}
 	}
@@ -124,20 +120,14 @@ function handleClick(row, col) {
 }
 
 function switchTurn() {
-    if(turnBlack){
-		countB++;
-		if(countB === 1 && countW === 1){
-			finish();
-		}
+    if(pass){
+		finish();
 	}
     else{
-		countW++;
-		if(countW === 1 && countB === 1){
-			finish();
-		}
-	}
-	turnBlack = !turnBlack;
-    bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
+		pass = true;
+        turnBlack = !turnBlack;
+        bodyElem.className = turnBlack ? "turnBlack" : "turnWhite";
+    }
 }
 
 function finish(){
