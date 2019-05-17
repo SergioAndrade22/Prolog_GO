@@ -131,7 +131,7 @@ function switchTurn() {
 }
 
 function finish(){
-	alert("Finish");
+	alert("Fin del juego, espere a que el resultado sea calculado");
 	var s = turnBlack ? "White" : "Black";
 	const c = "terminarJuego("+Pengine.stringify(gridData)+",PuntosW,PuntosB)";
 	pengine.ask(c);
