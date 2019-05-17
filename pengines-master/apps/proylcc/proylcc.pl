@@ -61,16 +61,12 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
     XIndexS is XIndex - 1,
     replace(X, XIndexS, Y, Xs, XsY).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%	Metodo recursivo que permite eliminar los elementos presentes en una lista del tablero
-%	eliminar (+Board, +AEliminar, ?NBoard)
+getElem(X, 0, [X|_Xs]).
 
-eliminarEncerrados(Board, [], Board).
-
-eliminarEncerrados(Board, [[Ficha, Fila, Columna]|AEliminar], NBoard):-
-    replace(Row, Fila, NRow, Board, RBoard),
-    replace(Ficha, Columna, "-", Row, NRow),
-    eliminarEncerrados(RBoard, AEliminar, NBoard).
+getElem(X, XIndex, [_Xi|Xs]):-
+    XIndex > 0,
+    XIndexS is XIndex - 1,
+    getElem(X, XIndexS, Xs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Perimite obtener una lista conteniendo todos los adyacentes de una posicion dada
@@ -100,14 +96,6 @@ adyacentes(Board, Fila, Columna, Adyacentes):-
 	append(FichaIzquierda,FichaDerecha,IzquierdaDerecha),
 	append(ArribaAbajo,IzquierdaDerecha,Adyacentes).
 
-getElem(X, 0, [X|_Xs]).
-
-getElem(X, XIndex, [_Xi|Xs]):-
-    XIndex > 0,
-    XIndexS is XIndex - 1,
-    getElem(X, XIndexS, Xs).
-
-%%Encerrados Tomi
 %Caso Base, cuando no quedan mas adyacentes por revisar, asumo que estoy encerrado
 encerrados(_Board, Player, R, C, [], _Vistos, [[Player,R,C]]).
 
@@ -186,8 +174,22 @@ encerradosVacios(Board, Vacio, Player, R, C, [[Player, _RAd, _CAd]|Adyacentes], 
 	Vacio \= Player,
 	encerradosVacios(Board, Vacio,Player, R, C, Adyacentes, Vistos,Encerrados).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%	Metodo recursivo que permite eliminar los elementos presentes en una lista del tablero
+%	eliminar (+Board, +AEliminar, ?NBoard)
+
+eliminarEncerrados(Board, [], Board).
+
+eliminarEncerrados(Board, [[Ficha, Fila, Columna]|AEliminar], NBoard):-
+    replace(Row, Fila, NRow, Board, RBoard),
+    replace(Ficha, Columna, "-", Row, NRow),
+    eliminarEncerrados(RBoard, AEliminar, NBoard).
+
+%
+%
 aplanarVacios(_Board, -1, []).
 
+%
 aplanarVacios(Board, F, Lista) :-
 	FAux is F - 1,
 	aplanarVacios(Board, FAux, ListaListas),
@@ -195,18 +197,24 @@ aplanarVacios(Board, F, Lista) :-
 	obtenerTernas(Fila,F,18,ListaTernas),
 	append(ListaListas,ListaTernas,Lista).
 
+%
+%
 obtenerTernas(_Fila, _F, -1, []).
 
+%
 obtenerTernas(Fila, F, Index, [[Ficha,F,Index]|Lista]):-
 	IndexAux is Index -1,
 	getElem(Ficha, Index, Fila),
 	Ficha = "-",
 	obtenerTernas(Fila, F, IndexAux, Lista).
 
+%
 obtenerTernas(Fila, F, Index, Lista):-
 	IndexAux is Index -1,
 	obtenerTernas(Fila, F, IndexAux, Lista).
 
+%
+%
 terminarJuego(Board, PuntosW, PuntosB):-
 	aplanarVacios(Board, 18, Vacios),
 	contarPuntos(Board, "b", Vacios, [], EncerradosB),
@@ -214,6 +222,7 @@ terminarJuego(Board, PuntosW, PuntosB):-
 	length(EncerradosB, PuntosB),
 	length(EncerradosW, PuntosW).
 
+%contarPuntos(Board, Player, Vacios, Vistos, Encerrados).
 %Caso base: No me quedan vacios por revisar
 contarPuntos(_Board, _Player, [], _Vistos, []).
 
@@ -225,7 +234,8 @@ contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):
 	append(Vistos, EncerradosTerreno, EncerradosVistos),
 	contarPuntos(Board, Player, Vacios, [["-",F,C]|EncerradosVistos], Encerrados),
 	append(Encerrados, EncerradosTerreno, ListaEncerradosTerreno).
-	
+
+%Caso recursivo 3: El siguiente adyacente no fue revisado, pero ya se que no está encerrado
 contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):-
 	\+(member(["-",F,C], Vistos)),
 	adyacentes(Board, F, C, Adyacentes),
@@ -233,6 +243,6 @@ contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):
 	append(Vistos, EncerradosTerreno, EncerradosVistos),
 	contarPuntos(Board, Player, Vacios, [["-",F,C]|EncerradosVistos], ListaEncerradosTerreno).
 
-%Caso recursivo 2: El siguiente en la lista ya fue revisado, O no esta encerrado
+%Caso recursivo 3: El siguiente en la lista ya fue revisado
 contarPuntos(Board, Player, [["-",F,C]|Vacios], Vistos, ListaEncerradosTerreno):-
 	contarPuntos(Board, Player, Vacios, [["-",F,C]|Vistos], ListaEncerradosTerreno).
