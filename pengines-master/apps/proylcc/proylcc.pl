@@ -71,7 +71,6 @@ getElem(X, XIndex, [_Xi|Xs]):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Perimite obtener una lista conteniendo todos los adyacentes de una posicion dada
 %	
-
 obtenerAdyacente(_Board, 19, _Columna, []).
 obtenerAdyacente(_Board, -1, _Columna, []).
 obtenerAdyacente(_Board, _Fila, 19, []).
@@ -187,40 +186,46 @@ eliminarEncerrados(Board, [[Ficha, Fila, Columna]|AEliminar], NBoard):-
 
 %
 %
-aplanarVacios(_Board, -1, []).
+aplanarTablero(_Board, _Player, -1, []).
 
 %
-aplanarVacios(Board, F, Lista) :-
+aplanarTablero(Board, Player, F, Lista) :-
 	FAux is F - 1,
-	aplanarVacios(Board, FAux, ListaListas),
+	aplanarTablero(Board, Player, FAux, ListaListas),
 	getElem(Fila, F, Board),
-	obtenerTernas(Fila,F,18,ListaTernas),
+	obtenerTernas(Player,Fila,F,18,ListaTernas),
 	append(ListaListas,ListaTernas,Lista).
 
 %
 %
-obtenerTernas(_Fila, _F, -1, []).
+obtenerTernas(_Player,_Fila, _F, -1, []).
 
 %
-obtenerTernas(Fila, F, Index, [[Ficha,F,Index]|Lista]):-
+obtenerTernas(Player,Fila, F, Index, [[Ficha,F,Index]|Lista]):-
 	IndexAux is Index -1,
 	getElem(Ficha, Index, Fila),
-	Ficha = "-",
-	obtenerTernas(Fila, F, IndexAux, Lista).
+	Ficha = Player,
+	obtenerTernas(Player,Fila, F, IndexAux, Lista).
 
 %
-obtenerTernas(Fila, F, Index, Lista):-
+obtenerTernas(Player,Fila, F, Index, Lista):-
 	IndexAux is Index -1,
-	obtenerTernas(Fila, F, IndexAux, Lista).
+	obtenerTernas(Player,Fila, F, IndexAux, Lista).
 
 %
 %
 terminarJuego(Board, PuntosW, PuntosB):-
-	aplanarVacios(Board, 18, Vacios),
+	aplanarTablero(Board, "-",18, Vacios),
+	aplanarTablero(Board, "w",18, Blancos),
+	aplanarTablero(Board, "b",18, Negros),
 	contarPuntos(Board, "b", Vacios, [], EncerradosB),
 	contarPuntos(Board, "w", Vacios, [], EncerradosW),
-	length(EncerradosB, PuntosB),
-	length(EncerradosW, PuntosW).
+	length(Blancos, FichasBlancas),
+	length(Negros, FichasNegras),
+	length(EncerradosB, PuntosBX),
+	length(EncerradosW, PuntosWX),
+	PuntosW is FichasBlancas + PuntosWX,
+	PuntosB is FichasNegras + PuntosBX.
 
 %contarPuntos(Board, Player, Vacios, Vistos, Encerrados).
 %Caso base: No me quedan vacios por revisar
