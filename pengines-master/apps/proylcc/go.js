@@ -97,6 +97,9 @@ function handleSuccess(response) {
                 alert("Fin del juego! Blanco: "+scoreW+" Negro: "+scoreB + '\n'
                     + "Empate, Victoria del jugador Blanco.");
             }
+			var res = confirm("El juego termino, ¿Desea comenzar una nueva partida?");
+			if(res === true)
+				location.reload();
 		}
 	}
 }
